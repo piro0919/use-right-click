@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# use-right-click
 
-## Getting Started
+React hook for custom context menus with desktop right-click and mobile long-press support.
 
-First, run the development server:
+## Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install use-right-click
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Usage
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```tsx
+import useRightClick from "use-right-click";
+import { useRef } from "react";
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+function MyComponent() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { context, close, handlers } = useRightClick({
+    ref,
+    onTrigger: (e) => console.log("Context menu triggered:", e),
+  });
 
-## Learn More
+  return (
+    <div ref={ref} {...handlers()}>
+      {context && (
+        <div
+          style={{
+            position: "fixed",
+            left: context.clientX,
+            top: context.clientY,
+          }}
+        >
+          <button onClick={close}>Close</button>
+        </div>
+      )}
+    </div>
+  );
+}
+```
 
-To learn more about Next.js, take a look at the following resources:
+## API
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### `useRightClick(props): UseRightClickResult`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+#### Props
 
-## Deploy on Vercel
+| Property | Type | Description |
+|----------|------|-------------|
+| `ref` | `RefObject<HTMLElement \| null>` | Reference to the target element |
+| `onTrigger` | `(e: MouseEvent \| PointerEvent) => void` | Optional callback when context menu is triggered |
+| `options` | `UseRightClickOptions` | Optional configuration |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+#### Options
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `threshold` | `number` | `400` | Long press duration in milliseconds |
+| `cancelOnMovement` | `number \| boolean` | `25` | Cancel if finger moves more than this many pixels |
+| `detect` | `LongPressEventType` | `"pointer"` | Event type to detect: `"mouse"`, `"touch"`, or `"pointer"` |
+
+#### Return Value
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `context` | `RightClickContext \| null` | Current context menu state, `null` when closed |
+| `close` | `() => void` | Function to close the context menu |
+| `handlers` | `() => EventHandlers` | Spread on target element for long-press support |
+
+### `RightClickContext`
+
+Contains event information when context menu is triggered:
+
+- `clientX`, `clientY` - Viewport coordinates
+- `pageX`, `pageY` - Page coordinates
+- `screenX`, `screenY` - Screen coordinates
+- `target` - The element that was clicked/touched
+- `currentTarget` - The element the handler is attached to
+- `altKey`, `ctrlKey`, `metaKey`, `shiftKey` - Modifier keys
+- `button`, `buttons` - Mouse button info
+- `type`, `timeStamp` - Event metadata
+- `pointerType`, `pressure`, `width`, `height` - Pointer event info (when available)
+
+## Features
+
+- Desktop right-click support via `contextmenu` event
+- Mobile long-press support via `use-long-press`
+- Configurable long-press threshold and movement tolerance
+- Full event context including position, modifiers, and pointer details
+- TypeScript support with full type definitions
+
+## License
+
+MIT
