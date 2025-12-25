@@ -1,6 +1,6 @@
 {
   "name": "use-right-click",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "React hook for custom context menus with desktop right-click and mobile long-press support",
   "keywords": [
     "react",
