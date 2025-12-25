@@ -2,6 +2,8 @@
 
 React hook for custom context menus with desktop right-click and mobile long-press support.
 
+[Demo](https://use-right-click.kkweb.io/)
+
 ## Installation
 
 ```bash
