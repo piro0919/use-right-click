@@ -50,7 +50,7 @@
     "start": "next start"
   },
   "peerDependencies": {
-    "react": ">=17.0.2"
+    "react": ">=19.2.5"
   },
   "dependencies": {
     "use-long-press": "3.3.0"
