@@ -55,19 +55,19 @@
     "react": ">=19.2.6"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.1.0",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@biomejs/biome": "2.4.15",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^20.19.41",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "babel-plugin-react-compiler": "1.0.0",
     "jsdom": "^25.0.1",
-    "next": "16.1.1",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "next": "16.2.6",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
     "tsup": "^8.5.1",
-    "typescript": "^5",
-    "vitest": "^2.1.8"
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
   }
 }
