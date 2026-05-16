@@ -1,13 +1,12 @@
+"use client";
+
 import {
-  useState,
+  type RefObject,
+  useCallback,
   useEffect,
   useRef,
-  useCallback,
-  type RefObject,
+  useState,
 } from "react";
-import { useLongPress, LongPressEventType } from "use-long-press";
-
-export { LongPressEventType };
 
 type BaseKeys =
   | "clientX"
@@ -42,10 +41,8 @@ export type RightClickContext = {
 export type UseRightClickOptions = {
   /** Long press threshold in milliseconds. Default: 400 */
   threshold?: number;
-  /** Cancel long press if finger moves more than this many pixels. Default: 25 */
-  cancelOnMovement?: number | boolean;
-  /** Detect long press on 'mouse' | 'touch' | 'pointer'. Default: 'pointer' (handles both mouse and touch) */
-  detect?: LongPressEventType;
+  /** Cancel long press if pointer moves more than this many pixels. Default: 25. Set to `false` to disable. */
+  cancelOnMovement?: number | false;
 };
 
 export type UseRightClickProps = {
@@ -55,20 +52,19 @@ export type UseRightClickProps = {
 };
 
 export type UseRightClickResult = {
-  /** Current context menu state. null when closed. */
+  /** Current context menu state. `null` when closed. */
   context: RightClickContext | null;
   /** Close the context menu */
   close: () => void;
-  /** Spread on the target element to enable long-press triggering */
-  handlers: ReturnType<typeof useLongPress>;
 };
 
-function buildContextFromNativeEvent(
+function buildContext(
   e: MouseEvent | PointerEvent,
   target: EventTarget | null,
-  currentTarget: EventTarget | null
+  currentTarget: EventTarget | null,
 ): RightClickContext {
-  const isPointer = e instanceof PointerEvent;
+  const isPointer =
+    typeof PointerEvent !== "undefined" && e instanceof PointerEvent;
   return {
     clientX: e.clientX,
     clientY: e.clientY,
@@ -76,60 +72,26 @@ function buildContextFromNativeEvent(
     pageY: e.pageY,
     screenX: e.screenX,
     screenY: e.screenY,
-
     target: target instanceof HTMLElement ? target : null,
     currentTarget: currentTarget instanceof HTMLElement ? currentTarget : null,
-
     altKey: e.altKey,
     ctrlKey: e.ctrlKey,
     metaKey: e.metaKey,
     shiftKey: e.shiftKey,
-
     button: e.button,
     buttons: e.buttons,
-
     type: e.type,
     timeStamp: e.timeStamp,
-
-    pointerType: isPointer ? e.pointerType : undefined,
-    pressure: isPointer ? e.pressure : undefined,
-    width: isPointer ? e.width : undefined,
-    height: isPointer ? e.height : undefined,
+    pointerType: isPointer ? (e as PointerEvent).pointerType : undefined,
+    pressure: isPointer ? (e as PointerEvent).pressure : undefined,
+    width: isPointer ? (e as PointerEvent).width : undefined,
+    height: isPointer ? (e as PointerEvent).height : undefined,
   };
-}
-
-function firstTouchToMouseLikeEvent(
-  e: TouchEvent,
-  target: EventTarget | null,
-  currentTarget: EventTarget | null
-): RightClickContext {
-  const t = e.changedTouches[0] ?? e.touches[0];
-  // Build a minimal MouseEvent-like object from touch coordinates.
-  // We keep modifiers and meta from the TouchEvent.
-  const mouseLike = {
-    clientX: t?.clientX ?? 0,
-    clientY: t?.clientY ?? 0,
-    pageX: t?.pageX ?? 0,
-    pageY: t?.pageY ?? 0,
-    screenX: t?.screenX ?? 0,
-    screenY: t?.screenY ?? 0,
-    altKey: e.altKey,
-    ctrlKey: e.ctrlKey,
-    metaKey: e.metaKey,
-    shiftKey: e.shiftKey,
-    button: 0,
-    buttons: 1,
-    type: e.type,
-    timeStamp: e.timeStamp,
-  } as unknown as MouseEvent;
-
-  return buildContextFromNativeEvent(mouseLike, target, currentTarget);
 }
 
 const DEFAULT_OPTIONS: Required<UseRightClickOptions> = {
   threshold: 400,
   cancelOnMovement: 25,
-  detect: LongPressEventType.Pointer,
 };
 
 export default function useRightClick({
@@ -138,6 +100,7 @@ export default function useRightClick({
   options,
 }: UseRightClickProps): UseRightClickResult {
   const opts = { ...DEFAULT_OPTIONS, ...options };
+  const { threshold, cancelOnMovement } = opts;
 
   const [context, setContext] = useState<RightClickContext | null>(null);
   const onTriggerRef = useRef(onTrigger);
@@ -145,74 +108,77 @@ export default function useRightClick({
     onTriggerRef.current = onTrigger;
   });
 
-  const bindLongPress = useLongPress(
-    (event: React.MouseEvent | React.TouchEvent) => {
-      // `use-long-press` can provide React SyntheticEvents. Use `nativeEvent`.
-      const native = (event as any).nativeEvent as Event;
+  const trigger = useCallback((e: MouseEvent | PointerEvent) => {
+    setContext(buildContext(e, e.target, e.currentTarget));
+    onTriggerRef.current?.(e);
+  }, []);
 
-      if (native instanceof MouseEvent) {
-        setContext(
-          buildContextFromNativeEvent(
-            native,
-            native.target,
-            native.currentTarget
-          )
-        );
-        onTriggerRef.current?.(native);
-        return;
-      }
-
-      if (native instanceof TouchEvent) {
-        setContext(
-          firstTouchToMouseLikeEvent(
-            native,
-            native.target,
-            native.currentTarget
-          )
-        );
-        // TouchEvent doesn't match MouseEvent|PointerEvent signature,
-        // but we still want to notify the caller.
-        // Cast to satisfy the type (coordinates are compatible).
-        onTriggerRef.current?.(native as unknown as PointerEvent);
-        return;
-      }
-    },
-    {
-      // Make sure we receive SyntheticEvents so we can access `nativeEvent`.
-      captureEvent: true,
-      threshold: opts.threshold,
-      detect: opts.detect,
-      // Avoid long-press via right mouse button
-      filterEvents: (event) => {
-        const e = (event as any).nativeEvent ?? event;
-        return !(e instanceof MouseEvent && e.button === 2);
-      },
-      onStart: (event) => {
-        // Prevent iOS native callout/context menu when possible.
-        event.preventDefault?.();
-      },
-      cancelOnMovement: opts.cancelOnMovement,
-    }
-  );
-
+  // Desktop: contextmenu
   useEffect(() => {
     const el = ref.current;
-
     if (!el) return;
 
     const handler = (e: MouseEvent) => {
       e.preventDefault();
-
-      setContext(buildContextFromNativeEvent(e, e.target, e.currentTarget));
-      onTriggerRef.current?.(e);
+      trigger(e);
     };
 
     el.addEventListener("contextmenu", handler);
-
     return () => el.removeEventListener("contextmenu", handler);
-  }, [ref]);
+  }, [ref, trigger]);
+
+  // Mobile / general pointer: long-press
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let startEvent: PointerEvent | null = null;
+
+    const clear = () => {
+      if (timer !== null) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      startEvent = null;
+    };
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      startEvent = e;
+      timer = setTimeout(() => {
+        if (startEvent) {
+          // Don't preventDefault here — the synthetic event will be the original pointerdown.
+          trigger(startEvent);
+        }
+        clear();
+      }, threshold);
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!startEvent || cancelOnMovement === false) return;
+      const dx = e.clientX - startEvent.clientX;
+      const dy = e.clientY - startEvent.clientY;
+      if (dx * dx + dy * dy > cancelOnMovement * cancelOnMovement) clear();
+    };
+
+    el.addEventListener("pointerdown", onPointerDown);
+    el.addEventListener("pointermove", onPointerMove);
+    el.addEventListener("pointerup", clear);
+    el.addEventListener("pointercancel", clear);
+    el.addEventListener("pointerleave", clear);
+
+    return () => {
+      clear();
+      el.removeEventListener("pointerdown", onPointerDown);
+      el.removeEventListener("pointermove", onPointerMove);
+      el.removeEventListener("pointerup", clear);
+      el.removeEventListener("pointercancel", clear);
+      el.removeEventListener("pointerleave", clear);
+    };
+  }, [ref, threshold, cancelOnMovement, trigger]);
 
   const close = useCallback(() => setContext(null), []);
 
-  return { context, close, handlers: bindLongPress };
+  return { context, close };
 }

@@ -39,7 +39,9 @@
   user-select: none;
   -webkit-user-select: none;
   cursor: context-menu;
-  transition: border-color 0.2s, background-color 0.2s;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
 }
 
 .demoArea:hover {
@@ -139,7 +141,7 @@
   border-radius: 8px;
   padding: 20px;
   overflow-x: auto;
-  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-family: "Menlo", "Monaco", "Courier New", monospace;
   font-size: 0.85rem;
   line-height: 1.6;
 }

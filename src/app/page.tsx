@@ -1,31 +1,35 @@
 "use client";
+import { useEffect, useRef } from "react";
 import useRightClick, { type RightClickContext } from "@/hooks/use-right-click";
-import { useRef, useEffect, type RefObject } from "react";
-import { useOnClickOutside } from "usehooks-ts";
 import styles from "./style.module.css";
 
 export default function Page(): React.JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { context, close, handlers } = useRightClick({
+  const { context, close } = useRightClick({
     ref,
     onTrigger: (e) => {
       console.log("Context menu triggered:", e);
     },
   });
 
-  useOnClickOutside(menuRef as RefObject<HTMLElement>, close);
-
-  // Close on ESC key
+  // Close on outside click + ESC key
   useEffect(() => {
     if (!context) return;
 
+    const handlePointer = (e: PointerEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) close();
+    };
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") close();
     };
 
+    document.addEventListener("pointerdown", handlePointer);
     document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointer);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, [context, close]);
 
   return (
@@ -40,7 +44,7 @@ export default function Page(): React.JSX.Element {
 
       <section className={styles.demoSection}>
         <h2 className={styles.sectionTitle}>Demo</h2>
-        <div ref={ref} className={styles.demoArea} {...handlers()}>
+        <div ref={ref} className={styles.demoArea}>
           <p className={styles.demoHint}>
             Right-click here (desktop) or long-press (mobile)
           </p>
@@ -82,7 +86,7 @@ export default function Page(): React.JSX.Element {
 
 function MyComponent() {
   const ref = useRef<HTMLDivElement>(null);
-  const { context, close, handlers } = useRightClick({
+  const { context, close } = useRightClick({
     ref,
     onTrigger: (e) => console.log(e),
     options: {
@@ -92,7 +96,7 @@ function MyComponent() {
   });
 
   return (
-    <div ref={ref} {...handlers()}>
+    <div ref={ref}>
       {context && (
         <Menu x={context.clientX} y={context.clientY} onClose={close} />
       )}
@@ -133,24 +137,39 @@ function ContextMenu({
   return (
     <div
       ref={ref}
+      role="menu"
       className={styles.contextMenu}
       style={{
         left: context.clientX,
         top: context.clientY,
       }}
       onClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => e.stopPropagation()}
     >
-      <button className={styles.menuItem} onClick={() => handleAction("copy")}>
+      <button
+        type="button"
+        className={styles.menuItem}
+        onClick={() => handleAction("copy")}
+      >
         Copy
       </button>
-      <button className={styles.menuItem} onClick={() => handleAction("cut")}>
+      <button
+        type="button"
+        className={styles.menuItem}
+        onClick={() => handleAction("cut")}
+      >
         Cut
       </button>
-      <button className={styles.menuItem} onClick={() => handleAction("paste")}>
+      <button
+        type="button"
+        className={styles.menuItem}
+        onClick={() => handleAction("paste")}
+      >
         Paste
       </button>
       <div className={styles.menuDivider} />
       <button
+        type="button"
         className={styles.menuItem}
         onClick={() => handleAction("delete")}
       >
