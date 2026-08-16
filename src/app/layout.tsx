@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://use-right-click.kkweb.io"),
   title: "use-right-click",
   description:
     "React hook for custom context menus with desktop right-click and mobile long-press support.",
