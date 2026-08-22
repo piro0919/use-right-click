@@ -33,53 +33,42 @@ export default function Page(): React.JSX.Element {
   }, [context, close]);
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>use-right-click</h1>
-        <p className={styles.description}>
-          React hook for custom context menus with desktop right-click and
-          mobile long-press support.
-        </p>
-      </header>
-
-      <section className={styles.demoSection}>
-        <h2 className={styles.sectionTitle}>Demo</h2>
-        <div ref={ref} className={styles.demoArea}>
-          <p className={styles.demoHint}>
-            Right-click here (desktop) or long-press (mobile)
+    // 面はページ全体。囲った枠の中だけで試させると、どこでも効くことが伝わらない
+    <div className={styles.container} ref={ref}>
+      <div className={styles.inner}>
+        <header className={styles.header}>
+          <h1 className={styles.title}>use-right-click</h1>
+          <p className={styles.description}>
+            React hook for custom context menus with desktop right-click and
+            mobile long-press support.
           </p>
+          <div className={styles.install}>npm i use-right-click</div>
+        </header>
+
+        <div className={styles.hint}>
+          <span className={styles.hintDot} />
+          Right-click anywhere on this page — or long-press on a touch screen.
         </div>
 
-        {context && (
-          <ContextMenu ref={menuRef} context={context} onClose={close} />
+        <h2 className={styles.sectionTitle}>Last trigger</h2>
+        {context ? (
+          <div className={styles.infoGrid}>
+            <InfoItem label="clientX" value={context.clientX} />
+            <InfoItem label="clientY" value={context.clientY} />
+            <InfoItem label="type" value={context.type} />
+            <InfoItem label="button" value={context.button} />
+            <InfoItem
+              label="target"
+              value={context.target?.tagName.toLowerCase() ?? "null"}
+            />
+            <InfoItem label="modifiers" value={formatModifiers(context)} />
+          </div>
+        ) : (
+          <p className={styles.infoEmpty}>
+            Nothing yet. The event details land here.
+          </p>
         )}
-      </section>
 
-      <section className={styles.infoSection}>
-        <h2 className={styles.sectionTitle}>Context Info</h2>
-        <div className={styles.infoCard}>
-          <div className={styles.infoTitle}>Last Trigger</div>
-          {context ? (
-            <div className={styles.infoGrid}>
-              <InfoItem label="clientX" value={context.clientX} />
-              <InfoItem label="clientY" value={context.clientY} />
-              <InfoItem label="type" value={context.type} />
-              <InfoItem label="button" value={context.button} />
-              <InfoItem
-                label="target"
-                value={context.target?.tagName.toLowerCase() ?? "null"}
-              />
-              <InfoItem label="modifiers" value={formatModifiers(context)} />
-            </div>
-          ) : (
-            <p style={{ color: "#888" }}>
-              Trigger the context menu to see event details
-            </p>
-          )}
-        </div>
-      </section>
-
-      <section className={styles.codeSection}>
         <h2 className={styles.sectionTitle}>Usage</h2>
         <pre className={styles.codeBlock}>
           <code>{`import useRightClick from "use-right-click";
@@ -104,18 +93,22 @@ function MyComponent() {
   );
 }`}</code>
         </pre>
-      </section>
 
-      <footer className={styles.footer}>
-        <a
-          href="https://github.com/piro0919/use-right-click"
-          className={styles.footerLink}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          View on GitHub
-        </a>
-      </footer>
+        <footer className={styles.footer}>
+          <a
+            className={styles.footerLink}
+            href="https://github.com/piro0919/use-right-click"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            View on GitHub
+          </a>
+        </footer>
+      </div>
+
+      {context && (
+        <ContextMenu context={context} onClose={close} ref={menuRef} />
+      )}
     </div>
   );
 }
