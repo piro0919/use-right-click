@@ -165,3 +165,9 @@
   margin: 8px 0;
   background: var(--line);
 }
+
+
+/* 見出しの書体 */
+.title {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+}
