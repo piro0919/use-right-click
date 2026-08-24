@@ -21,7 +21,6 @@ const display = Archivo({
   weight: ["700"],
 });
 
-
 export const metadata: Metadata = {
   metadataBase: new URL("https://use-right-click.kkweb.io"),
   alternates: { canonical: "/" },
@@ -37,7 +36,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} ${display.variable}`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} ${display.variable}`}
+      >
         {children}
         <Analytics />
       </body>

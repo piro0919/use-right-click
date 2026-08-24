@@ -9,12 +9,15 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 const TITLE = "use-right-click";
-const DESCRIPTION = "React hook for custom context menus, on desktop and mobile.";
+const DESCRIPTION =
+  "React hook for custom context menus, on desktop and mobile.";
 
 export default async function Image() {
   /* 見出しの書体はサイトと同じ Archivo。使う文字だけに絞ったものを
      同梱している。文言を変えたら assets/README.md の手順で作り直す */
-  const font = await readFile(join(process.cwd(), "assets/Archivo-700-subset.ttf"));
+  const font = await readFile(
+    join(process.cwd(), "assets/Archivo-700-subset.ttf"),
+  );
 
   return new ImageResponse(
     <div
@@ -36,27 +39,27 @@ export default async function Image() {
           width: 600,
         }}
       >
-      <div
-        style={{
-          display: "flex",
-          fontSize: 68,
-          fontWeight: 700,
-          letterSpacing: -1,
-        }}
-      >
-        {TITLE}
-      </div>
-      <div
-        style={{
-          display: "flex",
-          fontSize: 32,
-          marginTop: 28,
-          lineHeight: 1.4,
-          color: "#a1a1aa",
-        }}
-      >
-        {DESCRIPTION}
-      </div>
+        <div
+          style={{
+            display: "flex",
+            fontSize: 68,
+            fontWeight: 700,
+            letterSpacing: -1,
+          }}
+        >
+          {TITLE}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            fontSize: 32,
+            marginTop: 28,
+            lineHeight: 1.4,
+            color: "#a1a1aa",
+          }}
+        >
+          {DESCRIPTION}
+        </div>
         <div
           style={{
             display: "flex",
@@ -115,6 +118,7 @@ export default async function Image() {
           </div>
           {/* 右クリックした位置に出る、という話なのでカーソルを重ねる */}
           <svg
+            aria-hidden="true"
             fill="none"
             height="46"
             style={{ left: -20, position: "absolute", top: -24 }}
@@ -131,13 +135,10 @@ export default async function Image() {
           </svg>
         </div>
       </div>
-
     </div>,
     {
       ...size,
-      fonts: [
-        { data: font, name: "Archivo", style: "normal", weight: 700 },
-      ],
+      fonts: [{ data: font, name: "Archivo", style: "normal", weight: 700 }],
     },
   );
 }
