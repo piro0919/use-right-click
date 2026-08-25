@@ -50,7 +50,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "prepublishOnly": "pnpm test && pnpm build:lib",
-    "start": "next start"
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
     "react": ">=19.2.8"
