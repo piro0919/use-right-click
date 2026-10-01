@@ -22,7 +22,6 @@
   "bugs": {
     "url": "https://github.com/piro0919/use-right-click/issues"
   },
-  "type": "commonjs",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
