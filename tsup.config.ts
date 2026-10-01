@@ -6,5 +6,8 @@ export default defineConfig({
   dts: true,
   clean: true,
   external: ["react"],
+  // esbuild drops a "use client" it finds inside a file, so the banner puts it
+  // back. Leave treeshake off: its pass drops the banner too.
+  banner: { js: '"use client";' },
   tsconfig: "tsconfig.build.json",
 });
