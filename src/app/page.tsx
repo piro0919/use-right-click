@@ -103,6 +103,15 @@ function MyComponent() {
           >
             View on GitHub
           </a>
+          <span className={styles.footerLink}>{" · "}</span>
+          <a
+            className={styles.footerLink}
+            href="https://buymeacoffee.com/piro0919"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Buy Me a Coffee
+          </a>
         </footer>
       </div>
 
