@@ -52,26 +52,26 @@ function MyComponent() {
 
 #### Props
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `ref` | `RefObject<HTMLElement \| null>` | The element that opens the menu |
+| Property    | Type                                      | Description                           |
+| ----------- | ----------------------------------------- | ------------------------------------- |
+| `ref`       | `RefObject<HTMLElement \| null>`          | The element that opens the menu       |
 | `onTrigger` | `(e: MouseEvent \| PointerEvent) => void` | Optional callback when the menu opens |
-| `options` | `UseRightClickOptions` | Optional configuration |
+| `options`   | `UseRightClickOptions`                    | Optional configuration                |
 
 #### Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `threshold` | `number` | `400` | Long press duration in milliseconds |
-| `cancelOnMovement` | `number \| false` | `25` | Cancel the long press if the pointer moves more than this many pixels. `false` never cancels |
-| `mouseLongPress` | `boolean` | `false` | Also open on a long press of the left mouse button. Off by default: holding the mouse button starts a drag or a text selection |
+| Option             | Type              | Default | Description                                                                                                                    |
+| ------------------ | ----------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `threshold`        | `number`          | `400`   | Long press duration in milliseconds                                                                                            |
+| `cancelOnMovement` | `number \| false` | `25`    | Cancel the long press if the pointer moves more than this many pixels. `false` never cancels                                   |
+| `mouseLongPress`   | `boolean`         | `false` | Also open on a long press of the left mouse button. Off by default: holding the mouse button starts a drag or a text selection |
 
 #### Return Value
 
-| Property | Type | Description |
-|----------|------|-------------|
+| Property  | Type                        | Description                                    |
+| --------- | --------------------------- | ---------------------------------------------- |
 | `context` | `RightClickContext \| null` | Current context menu state, `null` when closed |
-| `close` | `() => void` | Close the context menu |
+| `close`   | `() => void`                | Close the context menu                         |
 
 ### `RightClickContext`
 
